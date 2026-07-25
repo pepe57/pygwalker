@@ -149,11 +149,12 @@ yarn build
 
 ## Appendix: Vite dev server (iframe transport)
 
-This is the **legacy** hot-reload path. It uses the Vite *dev server* plus the **iframe**
-transport (`env='Jupyter'`) and the `GlobalVarManager.set_component_url(...)` hook — it does
-**not** apply to the default anywidget transport. Prefer the anywidget HMR workflow above;
-this remains only for working on the iframe/`to_html` rendering path, which is deprecated and
-slated for removal in 0.7.0.
+This is the **legacy** hot-reload path. It uses the Vite *dev server* plus the deprecated
+low-level **iframe** compatibility renderer and the `GlobalVarManager.set_component_url(...)`
+hook — it does **not** apply to the default anywidget transport. The legacy `env='Jupyter'`
+and `env='JupyterWidget'` aliases are now coerced to anywidget, so they do not select this
+renderer. Prefer the anywidget HMR workflow above; the compatibility renderer is slated for
+removal in 0.7.0.
 
 Start the Vite dev server (serves the app under `/pyg_dev_app/` on port 8769):
 
@@ -169,7 +170,8 @@ source venv/bin/activate
 jupyter lab --ServerProxy.servers="{'pyg_dev_app': {'command': [], 'absolute_url': True, 'port': 8769, 'timeout': 30}}"
 ```
 
-Point PyGWalker at the dev server and render through the iframe transport:
+Point PyGWalker at the dev server and explicitly invoke the deprecated iframe compatibility
+method:
 
 ```python
 from pygwalker.services.global_var import GlobalVarManager
@@ -177,7 +179,9 @@ from pygwalker.services.global_var import GlobalVarManager
 GlobalVarManager.set_component_url("/pyg_dev_app/")   # "" to return to bundled assets
 
 import pygwalker as pyg
-pyg.walk(df, env="Jupyter")   # iframe transport honors component_url
+
+walker = pyg.Walker(df, computation="browser")
+walker.core.display_on_jupyter()   # deprecated; iframe transport honors component_url
 ```
 
 If `.wasm` files 404 from the dev server, ensure `vite.config.ts` keeps

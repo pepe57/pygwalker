@@ -102,8 +102,10 @@ This starts `yarn dev:build` (`vite build --watch`) and JupyterLab with `PYGWALK
 [`DEVELOPMENT.md`](./DEVELOPMENT.md) for the full workflow, flags, and log locations.
 
 The older Vite dev-server + `GlobalVarManager.set_component_url("/pyg_dev_app/")` +
-`jupyter-server-proxy` flow only drives the deprecated iframe transport (`env='Jupyter'`) and
-is documented as an appendix in [`DEVELOPMENT.md`](./DEVELOPMENT.md#appendix-vite-dev-server-iframe-transport).
+`jupyter-server-proxy` flow only drives the deprecated low-level iframe compatibility
+renderer. The legacy `env='Jupyter'` aliases now select anywidget instead; the explicit
+compatibility call is documented in
+[`DEVELOPMENT.md`](./DEVELOPMENT.md#appendix-vite-dev-server-iframe-transport).
 
 ## Validation
 

@@ -101,7 +101,9 @@ frontend — otherwise the two sides drift.
 The **iframe transport** (`services/render.py` + `templates/pygwalker_main_page.html`) is an
 alternative that embeds the compressed `iife` bundle in an `iframe` `srcdoc`, or points the
 iframe at a dev-server URL when `GlobalVarManager.component_url` is set. It backs
-`to_html()` and the deprecated `env='Jupyter'`/`'JupyterWidget'` paths.
+`to_html()` and the deprecated low-level `PygWalker.display_on_jupyter()` compatibility
+method. The legacy `env='Jupyter'`/`'JupyterWidget'` aliases are coerced to anywidget and do
+not select the iframe transport.
 
 ## Message protocol & transports
 

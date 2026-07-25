@@ -157,6 +157,14 @@ def _wait_for_first_build(service: "Service", timeout: float = 180.0) -> bool:
     return False
 
 
+def _unexpected_exit_code(service: "Service") -> int:
+    """Return a failing status for a managed service that stopped unexpectedly."""
+    if service.proc is None:
+        return 1
+    code = service.proc.returncode
+    return code if code not in (None, 0) else 1
+
+
 def _build_env(log_dir: Path) -> dict:
     env = os.environ.copy()
     # Force the frontend dev path on: the widget loads the built ESM from disk and hot-reloads.
@@ -206,6 +214,7 @@ def main() -> int:
     log_dir = Path(args.log_dir).resolve()
     log_dir.mkdir(parents=True, exist_ok=True)
     env = _build_env(log_dir)
+    exit_code = 0
 
     services: list[Service] = []
 
@@ -244,6 +253,7 @@ def main() -> int:
             if _wait_for_first_build(frontend):
                 print("[dev] frontend build ready.")
             elif not frontend.is_running():
+                exit_code = _unexpected_exit_code(frontend)
                 print("[dev] frontend build failed before completing; see logs/frontend.log.")
                 print("[dev] not starting Jupyter.")
                 _shutting_down.set()
@@ -268,6 +278,7 @@ def main() -> int:
                 if not svc.is_running():
                     code = svc.proc.returncode if svc.proc else "?"
                     print(f"[dev] {svc.name} exited (code {code}); shutting down the rest.")
+                    exit_code = _unexpected_exit_code(svc)
                     _shutting_down.set()
                     break
             time.sleep(0.5)
@@ -277,7 +288,7 @@ def main() -> int:
             svc.stop()
         print("[dev] done.")
 
-    return 0
+    return exit_code
 
 
 if __name__ == "__main__":
